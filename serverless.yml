@@ -1,0 +1,29 @@
+service: weatherAI
+frameworkVersion: '3'
+useDotenv: true
+	
+plugins:
+  - serverless-plugin-include-dependencies
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+      Resource: "arn:aws:s3:::<replace with your bucket>/*" # Replace with your Bucket
+  environment:
+    OPENAI_API_KEY: ${env:OPENAI_API_KEY}
+    OPENWEATHERMAP_API_KEY: ${env:OPENWEATHERMAP_API_KEY}
+    BUCKET_NAME: ${env:BUCKET_NAME}
+
+functions:
+  fetchWeatherSummary:
+    handler: index.fetchWeatherSummary
+    timeout: 30
+    events:
+      - http:
+          path: weather/{city}
+          method: GET
+          cors: true
